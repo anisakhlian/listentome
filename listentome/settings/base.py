@@ -44,6 +44,7 @@ THIRD_PARTY_APPS = [
 
 PROJECT_APPS = [
     'apps.users.apps.UsersConfig',
+    'apps.voices.apps.VoicesConfig',
 ]
 
 MIDDLEWARE = [
@@ -155,14 +156,22 @@ SWAGGER_SETTINGS = {
     'SHOW_REQUEST_HEADERS': True,
     'DOC_EXPANSION': 'none',
     'JSON_EDITOR': True,
-    # 'SECURITY_DEFINITIONS': {
-    #     'Token': {
-    #         'type': 'apiKey',
-    #         'name': 'Authorization',
-    #         'in': 'header',
-    #     },
-    # },
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+        },
+    },
 }
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.sendgrid.net.'
+EMAIL_HOST_USER = 'anisakhlian'
+EMAIL_HOST_PASSWORD = 'Fucknormality7'
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = 'anisakhlian@gmail.com'
+
+AUTH_USER_MODEL = 'users.User'
 
 django_heroku.settings(locals())
