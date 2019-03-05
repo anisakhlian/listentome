@@ -1,5 +1,6 @@
 import os
 
+import django_heroku
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -164,3 +165,4 @@ SWAGGER_SETTINGS = {
 }
 
 
+django_heroku.settings(locals())

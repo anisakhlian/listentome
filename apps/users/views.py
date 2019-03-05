@@ -10,4 +10,3 @@ class VoicePostViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
     parser_classes = (MultiPartParser,)
     queryset = VoicePost.objects.all()
-
