@@ -167,8 +167,8 @@ SWAGGER_SETTINGS = {
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.sendgrid.net.'
-EMAIL_HOST_USER = 'anisakhlian'
-EMAIL_HOST_PASSWORD = 'Fucknormality7'
+EMAIL_HOST_USER = 'listentome'
+EMAIL_HOST_PASSWORD = 'listentome333'
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = 'anisakhlian@gmail.com'
 

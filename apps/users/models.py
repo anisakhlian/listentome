@@ -6,9 +6,6 @@ from django.utils import timezone
 from django.db import models
 
 
-
-
-
 class CustomUserManager(UserManager):
     use_in_migrations = True
 
@@ -49,7 +46,7 @@ class CustomUserManager(UserManager):
 
         extra_fields.setdefault('first_name', 'Administrator')
         extra_fields.setdefault('last_name', 'Administrator')
-        super_user = self._create_user(email, password, **extra_fields)
+        super_user = self._create_user(username, email, password, **extra_fields)
         Token.objects.create(user=super_user)
         return super_user
 

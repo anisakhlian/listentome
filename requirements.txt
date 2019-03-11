@@ -19,7 +19,6 @@ Jinja2==2.10
 jsonpointer==1.14
 jsonschema==2.6.0
 MarkupSafe==1.1.0
-psycopg2==2.7.7
 psycopg2-binary==2.7.5
 pytz==2018.9
 PyYAML==3.13

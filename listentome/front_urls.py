@@ -1,0 +1,1 @@
+CONFIRMATION = 'confirmation/{token}/'

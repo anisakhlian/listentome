@@ -8,9 +8,9 @@ from django.conf.urls.static import static
 
 from apps.users.urls import router as users_router
 
-admin.site.site_header = 'ListeNtoME'
-admin.site.site_title = 'ListeNtoME'
-admin.site.index_title = 'Welcome to ListeNtoME Administration!'
+admin.site.site_header = 'Listen2ME'
+admin.site.site_title = 'Listen2ME'
+admin.site.index_title = 'Welcome to Listen2ME Administration!'
 
 
 class DefaultRouter(routers.DefaultRouter):
@@ -25,9 +25,9 @@ router.extend(users_router)
 
 schema_view = get_schema_view(
     openapi.Info(
-        title='ListeNtoMe API',
+        title='Listen2ME API',
         default_version='v1',
-        description='listentome api endpoints',
+        description='listen2me api endpoints',
     ),
     validators=['flex', 'ssv'],
     public=True,
