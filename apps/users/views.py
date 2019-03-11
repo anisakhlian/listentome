@@ -89,13 +89,13 @@ class LoginView(APIView):
         serializer.is_valid(raise_exception=True)
 
         credentials = {
-            'username': serializer.validated_data.get('email'),
+            'username': serializer.validated_data.get('username'),
             'password': serializer.validated_data.get('password'),
         }
         user = authenticate(**credentials)
         if user:
-            token = User.objects.get(email=serializer.validated_data.get('email')).auth_token
-            return Response({'token': token.key, 'role': user.role}, status.HTTP_200_OK)
+            token = User.objects.get(username=serializer.validated_data.get('username')).auth_token
+            return Response({'token': token.key}, status.HTTP_200_OK)
         else:
             return Response({'message': 'Invalid credentials'}, status.HTTP_404_NOT_FOUND)
 
@@ -124,8 +124,7 @@ class RequestResetPassView(APIView):
             'path': RESET_PASS.format(token=user.auth_token.key),
         })
         send_mail('Reset your password', message, settings.DEFAULT_FROM_EMAIL, [user.email])
-        return Response({'message': 'An email message was sent to your email address. '
-                                    'Please check your email to reset the password.'}, status.HTTP_200_OK)
+        return Response({'message': 'Please check your email to reset the password.'}, status.HTTP_200_OK)
 
 
 class ResetPassView(APIView):

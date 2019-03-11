@@ -55,8 +55,8 @@ class TokenSerializer(serializers.Serializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.EmailField(required=True,
-                                      help_text='Unique username.')
+    username = serializers.CharField(required=True,
+                                     help_text='Unique username.')
     password = serializers.CharField(required=True,
                                      help_text='Password of the user.')
 
