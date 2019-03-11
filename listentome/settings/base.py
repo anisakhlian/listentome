@@ -21,8 +21,8 @@ SECRET_KEY = '(xfr4-um-ohsfohcqx793en2zcin^z*!o2i4nxf9e!f%06rg^k'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['listen2me.herokuapp.com']
+APPEND_SLASH = False
 
 # Application definition
 

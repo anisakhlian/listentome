@@ -1,3 +1,4 @@
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -6,9 +7,14 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from drf_yasg.utils import swagger_auto_schema
 from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import authenticate
 
-from listentome.front_urls import CONFIRMATION
-from .serializers import UserSerializer, CreatedUserSerializer, FieldErrorSerializer
+from listentome.front_urls import CONFIRMATION, RESET_PASS
+from .serializers import (UserSerializer, CreatedUserSerializer, FieldErrorSerializer, ResponseSerializer,
+                          LoginSerializer, LoggedInSerializer, RequestResetPassSerializer, ResetPassSerializer,
+                          Error401Serializer)
+from .models import User
 
 
 def get_referer(request):
@@ -45,3 +51,104 @@ class SignUpView(APIView):
         })
         send_mail('Welcome to Listen2ME!', message, settings.DEFAULT_FROM_EMAIL, [user.email])
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ConfirmationView(APIView):
+    """
+    Confirms registration of corresponding user.
+    """
+
+    @swagger_auto_schema(responses={
+        status.HTTP_200_OK: ResponseSerializer,
+        status.HTTP_404_NOT_FOUND: ResponseSerializer,
+    })
+    def post(self, request, token):
+        user = get_object_or_404(User, auth_token__key=token)
+        Token.objects.filter(user=user).update(key=Token().generate_key())
+
+        user.is_active = True
+        user.save()
+        return Response({'message': 'Registration confirmed.'}, status.HTTP_200_OK)
+
+
+class LoginView(APIView):
+    """
+    Authenticates and logs in user with specified credentials.
+    """
+    serializer_class = LoginSerializer
+
+    def get_serializer(self):
+        return self.serializer_class()
+
+    @swagger_auto_schema(responses={
+        status.HTTP_200_OK: LoggedInSerializer,
+        status.HTTP_404_NOT_FOUND: ResponseSerializer,
+    })
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        credentials = {
+            'username': serializer.validated_data.get('email'),
+            'password': serializer.validated_data.get('password'),
+        }
+        user = authenticate(**credentials)
+        if user:
+            token = User.objects.get(email=serializer.validated_data.get('email')).auth_token
+            return Response({'token': token.key, 'role': user.role}, status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Invalid credentials'}, status.HTTP_404_NOT_FOUND)
+
+
+class RequestResetPassView(APIView):
+    """
+    Sends email to reset password.
+    """
+    serializer_class = RequestResetPassSerializer
+
+    def get_serializer(self):
+        return self.serializer_class()
+
+    @swagger_auto_schema(responses={
+        status.HTTP_200_OK: ResponseSerializer,
+        status.HTTP_400_BAD_REQUEST: FieldErrorSerializer,
+        status.HTTP_404_NOT_FOUND: ResponseSerializer,
+    })
+    def post(self, request):
+        serializer = RequestResetPassSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(User, email=serializer.validated_data['email'])
+
+        message = render_to_string('request_reset_pass.html', {
+            'domain': get_referer(request),
+            'path': RESET_PASS.format(token=user.auth_token.key),
+        })
+        send_mail('Reset your password', message, settings.DEFAULT_FROM_EMAIL, [user.email])
+        return Response({'message': 'An email message was sent to your email address. '
+                                    'Please check your email to reset the password.'}, status.HTTP_200_OK)
+
+
+class ResetPassView(APIView):
+    """
+    Retrieves auth_token from the header. Resets password if authentication was successful.
+    To reset password put token from the link in reset password email into the Authorization header.
+    """
+    serializer_class = ResetPassSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_serializer(self):
+        return self.serializer_class()
+
+    @swagger_auto_schema(responses={
+        status.HTTP_204_NO_CONTENT: '',
+        status.HTTP_400_BAD_REQUEST: FieldErrorSerializer,
+        status.HTTP_401_UNAUTHORIZED: Error401Serializer,
+    })
+    def patch(self, request):
+        serializer = ResetPassSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        Token.objects.filter(user=user).update(key=Token().generate_key())
+        return Response(status=status.HTTP_204_NO_CONTENT)
