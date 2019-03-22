@@ -1,6 +1,7 @@
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 
 from .models import User
 
@@ -42,7 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
         return norm_email
 
 
-class CreatedUserSerializer(UserSerializer):
+class CreatedUserSerializer(FriendlyErrorMessagesMixin, UserSerializer):
 
     class Meta:
         model = User
@@ -96,3 +97,9 @@ class Error403Serializer(serializers.Serializer):
 
 class ErrorSerializer(serializers.Serializer):
     detail = serializers.CharField(help_text='Details.')
+
+
+class FriendlyErrorSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    errors = serializers.ListField(child=ErrorSerializer())
+    message = serializers.CharField()
